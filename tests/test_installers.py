@@ -47,6 +47,7 @@ class InstallerRepositoryTests(unittest.TestCase):
         self.assertIn("$HOME/.local/bin", text)
         self.assertIn("srd-2024.json", text)
 
+    @unittest.skipUnless(os.name == "nt", "Windows installer dry run runs on Windows")
     def test_windows_dry_run_reports_plan(self):
         shell = shutil.which("pwsh") or shutil.which("powershell.exe")
         if not shell:
