@@ -1,0 +1,14 @@
+{
+  "sources": {
+    "reference": [
+      "srd52",
+      "basicRules2024"
+    ]
+  },
+  "reprintBehavior": "newest",
+  "images": {
+    "copyInternal": false,
+    "copyExternal": false
+  },
+  "tagPrefix": "ttrpg-cli"
+}

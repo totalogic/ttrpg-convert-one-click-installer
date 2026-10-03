@@ -1,0 +1,54 @@
+name: Test installers
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Unit checks (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate shell syntax
+        if: runner.os != 'Windows'
+        run: bash -n install.sh install.command
+
+  install-smoke:
+    name: Real install (${{ matrix.os }})
+    needs: unit
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install on Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: .\install.ps1 -NonInteractive
+      - name: Install on macOS/Linux
+        if: runner.os != 'Windows'
+        run: bash install.sh --non-interactive
+      - name: Verify on Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: '& "$env:LOCALAPPDATA\Programs\ttrpg-convert-cli\bin\ttrpg-convert.exe" --version'
+      - name: Verify on macOS/Linux
+        if: runner.os != 'Windows'
+        run: "$HOME/.local/bin/ttrpg-convert --version"
